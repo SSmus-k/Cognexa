@@ -18,8 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from courses.views import CourseViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet
+from users.views import UserViewSet
 
 router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
 router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'lessons', LessonViewSet, basename='lesson')
 router.register(r'enrollments', EnrollmentViewSet, basename='enrollment')
