@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-
+from .video_models import Video 
 
 class Course(models.Model):
     SUBJECT_CHOICES = [

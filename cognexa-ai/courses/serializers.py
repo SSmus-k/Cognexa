@@ -27,3 +27,10 @@ class UserProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProgress
         fields = ['id', 'user', 'lesson', 'lesson_title', 'completed', 'progress_percentage', 'last_watched_at']
+from .video_models import Video
+
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = '__all__'
+        read_only_fields = ['uploaded_by', 'views', 'created_at', 'updated_at']

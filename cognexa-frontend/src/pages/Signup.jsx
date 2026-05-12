@@ -219,6 +219,7 @@ export default function Signup() {
                 <input
                   type="password"
                   name="password"
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"

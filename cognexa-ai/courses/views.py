@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .models import Course, Lesson, Enrollment, UserProgress
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, UserProgressSerializer
+from .video_models import Video
+from .serializers import VideoSerializer
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -75,3 +78,19 @@ class UserProgressViewSet(viewsets.ModelViewSet):
         
         serializer = UserProgressSerializer(progress)
         return Response(serializer.data)
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Video.objects.filter(is_published=True)
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            queryset = queryset.filter(course_id=course_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
