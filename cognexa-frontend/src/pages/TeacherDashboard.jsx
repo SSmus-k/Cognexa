@@ -30,6 +30,7 @@ export default function TeacherDashboard() {
     }
     
     setUser(JSON.parse(userData))
+    fetchVideos()
   }, [navigate])
 
   const handleUploadChange = (e) => {
@@ -221,15 +222,20 @@ export default function TeacherDashboard() {
                   <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Course *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="course"
                     value={uploadData.course}
                     onChange={handleUploadChange}
-                    placeholder="Enter course ID or name"
                     className="w-full px-4 py-2.5 rounded-lg border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-amber-600"
                     required
-                  />
+                  >
+                    <option value="">Select a course</option>
+                    <option value="1">Math 101</option>
+                    <option value="2">Science 101</option>
+                    <option value="3">English 101</option>
+                    <option value="4">Nepali 101</option>
+                    <option value="5">Social Studies 101</option>
+                  </select>
                 </div>
               </div>
 

@@ -55,13 +55,7 @@ class QuestionOption(models.Model):
 
 class QuizAttempt(models.Model):
     id = models.AutoField(primary_key=True)
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='quiz_attempts'
-    )
-
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='quiz_attempts')
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     total_questions = models.IntegerField()

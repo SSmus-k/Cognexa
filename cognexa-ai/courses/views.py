@@ -2,11 +2,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from .models import Course, Lesson, Enrollment, UserProgress
-from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, UserProgressSerializer
-from .video_models import Video
-from .serializers import VideoSerializer
-
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.shortcuts import get_object_or_404
+from .models import Course, Video, Lesson, Enrollment, UserProgress
+from .serializers import CourseSerializer, VideoSerializer, LessonSerializer, EnrollmentSerializer, UserProgressSerializer
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -19,6 +18,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         if subject:
             queryset = queryset.filter(subject=subject)
         return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(instructor=self.request.user)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def enroll(self, request, pk=None):
@@ -34,6 +36,36 @@ class CourseViewSet(viewsets.ModelViewSet):
         courses = [e.course for e in enrollments]
         serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_teaching_courses(self, request):
+        courses = Course.objects.filter(instructor=request.user)
+        serializer = CourseSerializer(courses, many=True)
+        return Response(serializer.data)
+
+
+class VideoViewSet(viewsets.ModelViewSet):
+    queryset = Video.objects.all()
+    serializer_class = VideoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
+    
+    def get_queryset(self):
+        course_id = self.request.query_params.get('course_id', None)
+        if course_id:
+            return Video.objects.filter(course_id=course_id, is_published=True)
+        return Video.objects.filter(is_published=True)
+    
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def increment_views(self, request, pk=None):
+        video = self.get_object()
+        video.views += 1
+        video.save()
+        return Response({'views': video.views})
+
 
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
@@ -46,6 +78,7 @@ class LessonViewSet(viewsets.ModelViewSet):
             return Lesson.objects.filter(course_id=course_id)
         return Lesson.objects.all()
 
+
 class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
@@ -53,6 +86,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return Enrollment.objects.filter(user=self.request.user)
+
 
 class UserProgressViewSet(viewsets.ModelViewSet):
     queryset = UserProgress.objects.all()
@@ -64,33 +98,27 @@ class UserProgressViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def update_progress(self, request):
+        video_id = request.data.get('video_id')
         lesson_id = request.data.get('lesson_id')
         progress_percentage = request.data.get('progress_percentage', 0)
+        watch_time = request.data.get('watch_time', 0)
         
-        progress, created = UserProgress.objects.get_or_create(
-            user=request.user,
-            lesson_id=lesson_id
-        )
+        if video_id:
+            progress, created = UserProgress.objects.get_or_create(
+                user=request.user,
+                video_id=video_id
+            )
+        else:
+            progress, created = UserProgress.objects.get_or_create(
+                user=request.user,
+                lesson_id=lesson_id
+            )
+        
         progress.progress_percentage = progress_percentage
+        progress.watch_time = watch_time
         if progress_percentage >= 100:
             progress.completed = True
         progress.save()
         
         serializer = UserProgressSerializer(progress)
         return Response(serializer.data)
-
-
-class VideoViewSet(viewsets.ModelViewSet):
-    queryset = Video.objects.all()
-    serializer_class = VideoSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        queryset = Video.objects.filter(is_published=True)
-        course_id = self.request.query_params.get('course_id')
-        if course_id:
-            queryset = queryset.filter(course_id=course_id)
-        return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(uploaded_by=self.request.user)

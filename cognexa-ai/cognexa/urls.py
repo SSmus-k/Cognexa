@@ -17,22 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from courses.views import CourseViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet
+from courses.views import CourseViewSet, VideoViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet
 from users.views import UserViewSet
-from courses.views import CourseViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet, VideoViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'courses', CourseViewSet, basename='course')
+router.register(r'videos', VideoViewSet, basename='video')
 router.register(r'lessons', LessonViewSet, basename='lesson')
 router.register(r'enrollments', EnrollmentViewSet, basename='enrollment')
 router.register(r'progress', UserProgressViewSet, basename='progress')
-router.register(r'videos', VideoViewSet, basename='video')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
 ]
-
-

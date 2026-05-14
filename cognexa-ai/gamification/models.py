@@ -3,32 +3,19 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 
-
 class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='profile'
-    )
-
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     xp_points = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
     current_streak = models.IntegerField(default=0)
     longest_streak = models.IntegerField(default=0)
     last_activity_date = models.DateField(null=True, blank=True)
-
-    subscription_tier = models.CharField(
-        max_length=20,
-        choices=[
-            ('free', 'Free'),
-            ('premium', 'Premium'),
-            ('school', 'School Partnership'),
-        ],
-        default='free'
-    )
-
+    subscription_tier = models.CharField(max_length=20, choices=[
+        ('free', 'Free'),
+        ('premium', 'Premium'),
+        ('school', 'School Partnership'),
+    ], default='free')
     ai_questions_used_today = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -51,13 +38,7 @@ class Badge(models.Model):
 
 class UserBadge(models.Model):
     id = models.AutoField(primary_key=True)
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='badges'
-    )
-
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='badges')
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
     earned_at = models.DateTimeField(auto_now_add=True)
 
@@ -70,13 +51,7 @@ class UserBadge(models.Model):
 
 class Leaderboard(models.Model):
     id = models.AutoField(primary_key=True)
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='leaderboard'
-    )
-
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='leaderboard')
     rank = models.IntegerField()
     xp_points = models.IntegerField()
     level = models.IntegerField()
@@ -98,13 +73,7 @@ class Activity(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='activities'
-    )
-
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPES)
     description = models.TextField()
     xp_earned = models.IntegerField(default=0)

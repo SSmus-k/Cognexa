@@ -1,225 +1,287 @@
 import { motion } from 'framer-motion'
-import { Sparkles, BookOpen, Brain, Zap, Users, Trophy, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { BookOpen, Brain, Zap, Users, ArrowRight, Sparkles } from 'lucide-react'
 
 export default function Home() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
   }
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: [0.23, 1, 0.32, 1] },
-    },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
   }
 
-  const features = [
-    {
-      icon: <BookOpen className="w-8 h-8" />,
-      title: "500+ Video Lessons",
-      description: "Comprehensive courses in Math, Science, English, Nepali, and Social Studies"
-    },
-    {
-      icon: <Brain className="w-8 h-8" />,
-      title: "AI-Powered Tutor",
-      description: "Get instant explanations and personalized learning recommendations"
-    },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Gamified Learning",
-      description: "Earn XP, badges, and climb the leaderboard while learning"
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Community Support",
-      description: "Learn together with 10,000+ Nepali students"
-    },
-    {
-      icon: <Trophy className="w-8 h-8" />,
-      title: "Track Progress",
-      description: "Detailed analytics and personalized learning paths"
-    },
-    {
-      icon: <Sparkles className="w-8 h-8" />,
-      title: "Premium Content",
-      description: "Unlock advanced courses with expert instructors"
-    }
-  ]
-
-  const subjects = [
-    { name: "Math", emoji: "📐" },
-    { name: "Science", emoji: "🔬" },
-    { name: "English", emoji: "📚" },
-    { name: "Nepali", emoji: "🇳🇵" },
-    { name: "Social Studies", emoji: "🌍" }
-  ]
-
   return (
-    <div className="min-h-screen">
+    <div style={{ backgroundColor: 'var(--bg-primary)' }} className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="container mx-auto px-4">
+      <motion.section
+        className="relative py-20 md:py-32 overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {/* Subtle background blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
-            className="text-center space-y-6 max-w-4xl mx-auto"
+            className="absolute top-20 left-10 w-72 h-72 rounded-full"
+            style={{ backgroundColor: 'rgba(92, 124, 111, 0.03)' }}
+            animate={{ y: [0, 30, 0] }}
+            transition={{ duration: 8, repeat: Infinity }}
+          />
+          <motion.div
+            className="absolute bottom-20 right-10 w-96 h-96 rounded-full"
+            style={{ backgroundColor: 'rgba(92, 124, 111, 0.03)' }}
+            animate={{ y: [0, -30, 0] }}
+            transition={{ duration: 10, repeat: Infinity }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <motion.div
+            className="text-center"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            <motion.div variants={itemVariants} className="flex justify-center">
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Sparkles className="w-16 h-16 text-amber-600" />
-              </motion.div>
+            <motion.div variants={itemVariants} className="mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: 'var(--accent-pale)' }}>
+                <Sparkles size={16} style={{ color: 'var(--accent-primary)' }} />
+                <span style={{ color: 'var(--accent-primary)' }} className="text-sm font-medium">Welcome to CognexaAi</span>
+              </div>
             </motion.div>
 
-            <motion.h1 variants={itemVariants} className="text-slate-900 dark:text-white">
-              Welcome to CognexaAi
+            <motion.h1
+              variants={itemVariants}
+              style={{ color: 'var(--text-secondary)' }}
+              className="text-5xl md:text-6xl font-bold mb-6 leading-tight"
+            >
+              Learn with Purpose.
+              <br />
+              <span style={{ color: 'var(--accent-primary)' }}>Grow with Intention.</span>
             </motion.h1>
 
-            <motion.p variants={itemVariants} className="text-xl text-slate-700 dark:text-gray-300">
-              Master Math, Science, English, Nepali, and Social Studies with AI-powered tutoring, gamified learning, and personalized education paths designed for Nepali students.
+            <motion.p
+              variants={itemVariants}
+              style={{ color: 'var(--text-muted)' }}
+              className="text-lg md:text-xl mb-8 max-w-2xl mx-auto"
+            >
+              CognexaAi is an AI-powered learning platform designed for Nepali students. Learn at your pace, master new skills, and track your progress with intelligent insights.
             </motion.p>
 
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <Link to="/courses">
-                <button className="btn btn-primary flex items-center gap-2">
-                  Start Learning <ArrowRight size={20} />
-                </button>
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
+              <Link
+                to="/signup"
+                className="btn-primary inline-flex items-center justify-center gap-2"
+              >
+                Start Learning <ArrowRight size={18} />
               </Link>
-              <button className="btn btn-secondary">
-                Learn More
-              </button>
+              <Link
+                to="/courses"
+                className="btn-secondary inline-flex items-center justify-center gap-2"
+              >
+                Explore Courses
+              </Link>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 pt-12">
+            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 pt-12 max-w-2xl mx-auto">
               <div>
-                <div className="text-3xl font-bold text-amber-600">10,000+</div>
-                <div className="text-sm text-slate-600 dark:text-gray-400">Students Learning</div>
+                <div style={{ color: 'var(--accent-primary)' }} className="text-3xl font-bold">10,000+</div>
+                <div style={{ color: 'var(--text-muted)' }} className="text-sm">Students</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-amber-600">500+</div>
-                <div className="text-sm text-slate-600 dark:text-gray-400">Video Lessons</div>
+                <div style={{ color: 'var(--accent-primary)' }} className="text-3xl font-bold">500+</div>
+                <div style={{ color: 'var(--text-muted)' }} className="text-sm">Lessons</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-amber-600">5</div>
-                <div className="text-sm text-slate-600 dark:text-gray-400">Subject Areas</div>
+                <div style={{ color: 'var(--accent-primary)' }} className="text-3xl font-bold">5</div>
+                <div style={{ color: 'var(--text-muted)' }} className="text-sm">Subjects</div>
               </div>
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-32 bg-white dark:bg-slate-800 bg-opacity-50">
-        <div className="container mx-auto px-4">
+      <motion.section
+        className="py-20 md:py-32"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-7xl mx-auto px-4">
           <motion.div
             className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-slate-900 dark:text-white mb-4">Why Choose CognexaAi?</h2>
-            <p className="text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need for successful learning in one platform
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid md:grid-cols-3 gap-8"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {features.map((feature, idx) => (
+            <motion.h2
+              variants={itemVariants}
+              style={{ color: 'var(--text-secondary)' }}
+              className="text-3xl md:text-4xl font-bold mb-4"
+            >
+              Why Choose CognexaAi?
+            </motion.h2>
+            <motion.p
+              variants={itemVariants}
+              style={{ color: 'var(--text-muted)' }}
+              className="text-lg max-w-2xl mx-auto"
+            >
+              Designed for focused learning with minimal distractions
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {[
+              { icon: <Brain size={24} />, title: 'AI Tutor', desc: 'Get instant answers powered by AI' },
+              { icon: <BookOpen size={24} />, title: '5 Subjects', desc: 'Math, Science, English, Nepali, Social Studies' },
+              { icon: <Zap size={24} />, title: 'Gamified', desc: 'Earn XP, badges, and climb leaderboards' },
+              { icon: <Users size={24} />, title: 'Community', desc: 'Learn together with peers' },
+            ].map((feature, idx) => (
               <motion.div
                 key={idx}
                 variants={itemVariants}
                 className="card group"
+                style={{ backgroundColor: 'var(--surface)' }}
               >
-                <div className="text-amber-600 mb-4 group-hover:scale-110 transition-transform">
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+                  style={{ backgroundColor: 'var(--accent-pale)', color: 'var(--accent-primary)' }}
+                >
                   {feature.icon}
                 </div>
-                <h3 className="text-slate-900 dark:text-white mb-2">{feature.title}</h3>
-                <p className="text-slate-600 dark:text-gray-400 text-sm">{feature.description}</p>
+                <h3 style={{ color: 'var(--text-secondary)' }} className="font-semibold mb-2">{feature.title}</h3>
+                <p style={{ color: 'var(--text-muted)' }} className="text-sm">{feature.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Subjects Section */}
-      <section className="py-20 md:py-32">
-        <div className="container mx-auto px-4">
+      <motion.section
+        className="py-20 md:py-32 grid-bg"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-7xl mx-auto px-4">
           <motion.div
             className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-slate-900 dark:text-white mb-4">Our Subject Categories</h2>
-            <p className="text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Comprehensive courses across all major subjects
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid md:grid-cols-5 gap-6"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {subjects.map((subject, idx) => (
+            <motion.h2
+              variants={itemVariants}
+              style={{ color: 'var(--text-secondary)' }}
+              className="text-3xl md:text-4xl font-bold mb-4"
+            >
+              Study Any Subject
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-5 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {['Math', 'Science', 'English', 'Nepali', 'Social Studies'].map((subject, idx) => (
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="card text-center cursor-pointer hover:scale-105"
+                className="card text-center"
+                style={{ backgroundColor: 'var(--surface)' }}
               >
-                <div className="text-5xl mb-4">{subject.emoji}</div>
-                <h3 className="text-slate-900 dark:text-white font-semibold">{subject.name}</h3>
+                <h3 style={{ color: 'var(--text-secondary)' }} className="font-semibold">{subject}</h3>
               </motion.div>
             ))}
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-r from-amber-600 to-amber-700 text-white">
-        <div className="container mx-auto px-4 text-center">
+      <motion.section
+        className="py-20 md:py-32"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-4xl mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="card text-center"
+            style={{ backgroundColor: 'var(--accent-primary)', color: 'white' }}
+            variants={itemVariants}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6 max-w-2xl mx-auto"
           >
-            <h2 className="text-white">Ready to Transform Your Learning?</h2>
-            <p className="text-lg text-amber-100">
-              Join thousands of Nepali students already learning with CognexaAi
-            </p>
-            <Link to="/courses">
-              <button className="bg-white text-amber-600 font-semibold px-8 py-3 rounded-lg hover:bg-amber-50 transition-all">
-                Get Started Now
-              </button>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Learning?</h2>
+            <p className="text-lg mb-8 opacity-90">Join thousands of Nepali students mastering new skills with CognexaAi</p>
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-semibold transition-all"
+              style={{ backgroundColor: 'white', color: 'var(--accent-primary)' }}
+            >
+              Get Started Free <ArrowRight size={18} />
             </Link>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
+
+      {/* Footer */}
+      <footer style={{ backgroundColor: 'var(--surface)', borderTopColor: 'var(--divider)' }} className="border-t py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 style={{ color: 'var(--text-secondary)' }} className="font-semibold mb-4">CognexaAi</h3>
+              <p style={{ color: 'var(--text-muted)' }} className="text-sm">AI-powered learning for Nepali students</p>
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-secondary)' }} className="font-semibold mb-4 text-sm">Product</h4>
+              <ul className="space-y-2">
+                <li><Link to="/courses" style={{ color: 'var(--text-muted)' }} className="text-sm hover:opacity-70">Courses</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-secondary)' }} className="font-semibold mb-4 text-sm">Company</h4>
+              <ul className="space-y-2">
+                <li><a href="#" style={{ color: 'var(--text-muted)' }} className="text-sm hover:opacity-70">About</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-secondary)' }} className="font-semibold mb-4 text-sm">Legal</h4>
+              <ul className="space-y-2">
+                <li><a href="#" style={{ color: 'var(--text-muted)' }} className="text-sm hover:opacity-70">Privacy</a></li>
+              </ul>
+            </div>
+          </div>
+          <div style={{ borderTopColor: 'var(--divider)' }} className="border-t pt-8 text-center">
+            <p style={{ color: 'var(--text-muted)' }} className="text-sm">© 2024 CognexaAi. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

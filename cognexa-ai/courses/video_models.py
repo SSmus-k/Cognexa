@@ -5,7 +5,7 @@ User = get_user_model()
 
 class Video(models.Model):
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(default='No description provided.')
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='videos')
     lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='videos', blank=True, null=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='uploaded_videos')
