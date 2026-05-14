@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.utils import timezone
 
-User = get_user_model()
+
 
 class Course(models.Model):
     SUBJECT_CHOICES = [
@@ -17,7 +17,7 @@ class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
-    instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses_taught')
+    instructor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='courses_taught')
     thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,7 +43,7 @@ class Video(models.Model):
     duration = models.IntegerField(help_text="Duration in seconds", default=0)
     order = models.IntegerField(default=0)
     is_published = models.BooleanField(default=False)
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='uploaded_videos')
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='uploaded_videos')
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,7 +76,7 @@ class Lesson(models.Model):
 
 class UserProgress(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='progress')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='progress')
     video = models.ForeignKey(Video, on_delete=models.CASCADE, null=True, blank=True)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
     completed = models.BooleanField(default=False)
@@ -96,7 +96,7 @@ class UserProgress(models.Model):
 
 class Enrollment(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
