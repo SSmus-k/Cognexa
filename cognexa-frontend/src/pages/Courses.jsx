@@ -1,155 +1,366 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { BookOpen, Filter, Search } from 'lucide-react'
-import axios from 'axios'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Upload, Video, BookOpen, Users, Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { videoAPI, courseAPI } from '../services/api'
 
-export default function Courses() {
+export default function TeacherDashboard() {
+  const [user, setUser] = useState(null)
+  const [videos, setVideos] = useState([])
   const [courses, setCourses] = useState([])
-  const [filteredCourses, setFilteredCourses] = useState([])
-  const [selectedSubject, setSelectedSubject] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  const subjects = ['all', 'Math', 'Science', 'English', 'Nepali', 'SocialStudies']
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [uploadData, setUploadData] = useState({
+    title: '',
+    description: '',
+    course: '',
+    video_file: null,
+  })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState({ text: '', type: '' })
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // Fetch courses from Django API
-    const fetchCourses = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/courses/')
-        setCourses(response.data)
-        setFilteredCourses(response.data)
-      } catch (error) {
-        console.error('Error fetching courses:', error)
-        // Mock data for demo
-        setCourses([
-          { id: 1, title: 'Algebra Basics', subject: 'Math', description: 'Learn fundamentals of algebra' },
-          { id: 2, title: 'Physics 101', subject: 'Science', description: 'Introduction to physics' },
-          { id: 3, title: 'English Grammar', subject: 'English', description: 'Master English grammar' },
-        ])
-      } finally {
-        setLoading(false)
-      }
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    if (!token || !userData) {
+      navigate('/login')
+      return
     }
-
+    setUser(JSON.parse(userData))
+    fetchVideos()
     fetchCourses()
-  }, [])
+  }, [navigate])
 
-  useEffect(() => {
-    let filtered = courses
-
-    if (selectedSubject !== 'all') {
-      filtered = filtered.filter(course => course.subject === selectedSubject)
+  const fetchCourses = async () => {
+    try {
+      const data = await courseAPI.getMyTeachingCourses()
+      setCourses(data.results || data)
+    } catch (error) {
+      console.error('Error fetching courses:', error)
     }
+  }
 
-    if (searchTerm) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  const fetchVideos = async () => {
+    try {
+      const data = await videoAPI.listVideos()
+      setVideos(data.results || data)
+    } catch (error) {
+      console.error('Error fetching videos:', error)
     }
+  }
 
-    setFilteredCourses(filtered)
-  }, [selectedSubject, searchTerm, courses])
+  const handleUploadChange = (e) => {
+    const { name, value, files } = e.target
+    if (name === 'video_file') {
+      setUploadData({ ...uploadData, video_file: files[0] })
+    } else {
+      setUploadData({ ...uploadData, [name]: value })
+    }
+  }
+
+  const handleUploadSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage({ text: '', type: '' })
+
+    try {
+      const formData = new FormData()
+      formData.append('title', uploadData.title)
+      formData.append('description', uploadData.description)
+      formData.append('course', uploadData.course)
+      formData.append('video_file', uploadData.video_file)
+      formData.append('is_published', true)
+
+      await videoAPI.uploadVideo(formData)
+
+      setMessage({ text: 'Video uploaded successfully!', type: 'success' })
+      setUploadData({ title: '', description: '', course: '', video_file: null })
+      setShowUploadForm(false)
+      fetchVideos()
+    } catch (error) {
+      setMessage({ text: 'Error uploading video: ' + error.message, type: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+      </div>
+    )
+  }
+
+  const stats = [
+    { icon: <Video size={20} />, label: 'Videos Uploaded', value: videos.length },
+    { icon: <Users size={20} />, label: 'Students', value: 0 },
+    { icon: <BookOpen size={20} />, label: 'Courses', value: courses.length },
+  ]
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
-        >
-          <h1 className="text-slate-900 dark:text-white mb-4">Explore Courses</h1>
-          <p className="text-slate-600 dark:text-gray-400 text-lg">
-            Choose from our comprehensive collection of courses
+    <div style={{ backgroundColor: 'var(--bg-primary)' }} className="min-h-screen">
+
+      {/* Header */}
+      <div
+        style={{ backgroundColor: 'var(--surface)', borderBottomColor: 'var(--divider)' }}
+        className="border-b sticky top-16 z-40"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <h1 style={{ color: 'var(--text-secondary)' }} className="text-2xl font-semibold">
+            Teacher Dashboard
+          </h1>
+          <p style={{ color: 'var(--text-muted)' }} className="text-sm mt-1">
+            Welcome back, {user.first_name || user.username}
           </p>
-        </motion.div>
+        </div>
+      </div>
 
-        {/* Search and Filter */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+
+        {/* Stats */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12 space-y-6"
+          transition={{ staggerChildren: 0.1 }}
         >
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-amber-600"
-            />
-          </div>
-
-          {/* Subject Filter */}
-          <div className="flex flex-wrap gap-3">
-            {subjects.map(subject => (
-              <button
-                key={subject}
-                onClick={() => setSelectedSubject(subject)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  selectedSubject === subject
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300'
-                }`}
-              >
-                {subject === 'all' ? 'All Subjects' : subject === 'SocialStudies' ? 'Social Studies' : subject}
-              </button>
-            ))}
-          </div>
+          {stats.map((stat, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="card"
+              style={{ backgroundColor: 'var(--surface)' }}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p style={{ color: 'var(--text-muted)' }} className="text-sm font-medium mb-2">
+                    {stat.label}
+                  </p>
+                  <p style={{ color: 'var(--text-secondary)' }} className="text-3xl font-semibold">
+                    {stat.value}
+                  </p>
+                </div>
+                <div style={{ color: 'var(--accent-primary)' }} className="opacity-60">
+                  {stat.icon}
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
 
-        {/* Courses Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin">
-              <BookOpen className="w-8 h-8 text-amber-600" />
-            </div>
-            <p className="mt-4 text-slate-600 dark:text-gray-400">Loading courses...</p>
+        {/* Upload Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="card mb-8"
+          style={{ backgroundColor: 'var(--surface)' }}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 style={{ color: 'var(--text-secondary)' }} className="text-lg font-semibold flex items-center gap-2">
+              <Upload size={20} style={{ color: 'var(--accent-primary)' }} />
+              Upload Video
+            </h2>
+            <button
+              onClick={() => setShowUploadForm(!showUploadForm)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: showUploadForm ? 'var(--bg-secondary)' : 'var(--accent-primary)',
+                color: showUploadForm ? 'var(--text-muted)' : 'white'
+              }}
+            >
+              {showUploadForm ? <><X size={16} /> Cancel</> : <><Plus size={16} /> Upload New Video</>}
+            </button>
           </div>
-        ) : filteredCourses.length > 0 ? (
-          <motion.div
-            className="grid md:grid-cols-3 gap-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ staggerChildren: 0.1 }}
-          >
-            {filteredCourses.map((course, idx) => (
+
+          {/* Message */}
+          <AnimatePresence>
+            {message.text && (
               <motion.div
-                key={course.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="card group cursor-pointer"
+                exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-lg flex items-center gap-3"
+                style={{
+                  backgroundColor: message.type === 'error' ? '#FEF2F2' : '#F0FDF4',
+                  color: message.type === 'error' ? '#DC2626' : '#16A34A'
+                }}
               >
-                <div className="mb-4 h-40 bg-gradient-to-br from-amber-200 to-amber-400 rounded-lg group-hover:shadow-lg transition-all" />
-                <h3 className="text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 transition-colors">
-                  {course.title}
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-gray-400 mb-4">
-                  {course.description}
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-amber-600 bg-amber-100 dark:bg-amber-900 px-3 py-1 rounded-full">
-                    {course.subject}
-                  </span>
-                  <button className="text-amber-600 hover:text-amber-700 font-semibold">
-                    Enroll →
-                  </button>
-                </div>
+                {message.type === 'error'
+                  ? <AlertCircle size={18} />
+                  : <CheckCircle size={18} />
+                }
+                {message.text}
               </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-600 dark:text-gray-400">No courses found matching your criteria</p>
-          </div>
-        )}
+            )}
+          </AnimatePresence>
+
+          {/* Upload Form */}
+          <AnimatePresence>
+            {showUploadForm && (
+              <motion.form
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                onSubmit={handleUploadSubmit}
+                className="space-y-5"
+              >
+                <div className="grid md:grid-cols-2 gap-5">
+                  <div>
+                    <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-2">
+                      Video Title *
+                    </label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={uploadData.title}
+                      onChange={handleUploadChange}
+                      placeholder="Enter video title"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-2">
+                      Course *
+                    </label>
+                    <select
+                      name="course"
+                      value={uploadData.course}
+                      onChange={handleUploadChange}
+                      required
+                    >
+                      <option value="">Select a course</option>
+                      {courses.length > 0 ? (
+                        courses.map(course => (
+                          <option key={course.id} value={course.id}>{course.title}</option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="1">Math 101</option>
+                          <option value="2">Science 101</option>
+                          <option value="3">English 101</option>
+                          <option value="4">Nepali 101</option>
+                          <option value="5">Social Studies 101</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={uploadData.description}
+                    onChange={handleUploadChange}
+                    placeholder="Enter video description"
+                    rows="3"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium mb-2">
+                    Video File * (MP4, WebM, etc.)
+                  </label>
+                  <input
+                    type="file"
+                    name="video_file"
+                    onChange={handleUploadChange}
+                    accept="video/*"
+                    required
+                  />
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 rounded-lg font-medium text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: 'var(--accent-primary)' }}
+                >
+                  {loading ? 'Uploading...' : 'Upload Video'}
+                </motion.button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Videos List */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card"
+          style={{ backgroundColor: 'var(--surface)' }}
+        >
+          <h2 style={{ color: 'var(--text-secondary)' }} className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <Video size={20} style={{ color: 'var(--accent-primary)' }} />
+            Your Videos
+          </h2>
+
+          {videos.length > 0 ? (
+            <div className="space-y-6">
+              {videos.map((video, idx) => (
+                <motion.div
+                  key={video.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  style={{
+                    borderLeftColor: 'var(--accent-primary)',
+                    backgroundColor: 'var(--bg-tertiary)',
+                    borderBottomColor: 'var(--divider)'
+                  }}
+                  className="border-l-2 pl-4 py-4 rounded-r-lg border-b last:border-b-0"
+                >
+                  {/* Fixed video player — constrained height, black background for portrait */}
+                  {video.video_file && (
+                    <div className="mb-4 rounded-lg overflow-hidden bg-black flex items-center justify-center"
+                      style={{ maxHeight: '280px' }}
+                    >
+                      <video
+                        controls
+                        style={{ maxHeight: '280px', maxWidth: '100%', objectFit: 'contain' }}
+                        src={video.video_file}
+                      />
+                    </div>
+                  )}
+
+                  <h3 style={{ color: 'var(--text-secondary)' }} className="font-medium mb-1">
+                    {video.title}
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)' }} className="text-sm mb-3">
+                    {video.description}
+                  </p>
+                  <div className="flex gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span>Views: {video.views}</span>
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: video.is_published ? 'var(--accent-pale)' : 'var(--bg-secondary)',
+                        color: video.is_published ? 'var(--accent-primary)' : 'var(--text-muted)'
+                      }}
+                    >
+                      {video.is_published ? 'Published' : 'Draft'}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <Video className="w-10 h-10 mx-auto mb-4 opacity-30" style={{ color: 'var(--text-muted)' }} />
+              <p style={{ color: 'var(--text-muted)' }} className="text-sm">No videos uploaded yet</p>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   )

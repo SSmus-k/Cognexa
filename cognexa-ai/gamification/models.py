@@ -19,7 +19,18 @@ class UserProfile(models.Model):
     ai_questions_used_today = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def calculate_level(self):
+        # Every 500 XP = 1 level
+        return max(1, self.xp_points // 500 + 1)
 
+    def reset_ai_questions_if_new_day(self):
+        today = timezone.now().date()
+        if self.last_activity_date != today:
+            self.ai_questions_used_today = 0
+            self.last_activity_date = today
+            self.save()
+            
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
@@ -49,19 +60,6 @@ class UserBadge(models.Model):
         return f"{self.user.username} - {self.badge.name}"
 
 
-class Leaderboard(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='leaderboard')
-    rank = models.IntegerField()
-    xp_points = models.IntegerField()
-    level = models.IntegerField()
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['rank']
-
-    def __str__(self):
-        return f"{self.user.username} - Rank {self.rank}"
 
 
 class Activity(models.Model):

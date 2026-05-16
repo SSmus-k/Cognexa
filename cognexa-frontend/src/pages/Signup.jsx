@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react'
-import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:8000/api'
+import { authAPI } from '../services/api'
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -34,26 +32,21 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/users/register/`, formData)
+      const response = await authAPI.register(formData)
 
       setSuccess(true)
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      localStorage.setItem('token', response.token)
+      localStorage.setItem('user', JSON.stringify(response.user))
 
       setTimeout(() => {
-        if (response.data.user.role === 'teacher') {
+        if (response.user.role === 'teacher') {
           navigate('/teacher-dashboard')
         } else {
           navigate('/dashboard')
         }
       }, 2000)
     } catch (err) {
-      const errorMsg = err.response?.data
-      if (typeof errorMsg === 'object') {
-        setError(Object.values(errorMsg)[0]?.[0] || 'Signup failed')
-      } else {
-        setError('Signup failed. Please try again.')
-      }
+      setError(err.message || 'Signup failed. Please try again.')
     } finally {
       setLoading(false)
     }

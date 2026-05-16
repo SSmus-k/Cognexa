@@ -1,10 +1,11 @@
 from django.db import models
 from django.conf import settings
-from courses.models import Lesson
+from courses.models import Video  # changed from Lesson to Video
+
 
 class Quiz(models.Model):
     id = models.AutoField(primary_key=True)
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='quizzes')
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name='quizzes')  # was lesson
     title = models.CharField(max_length=255)
     description = models.TextField()
     passing_score = models.IntegerField(default=70)

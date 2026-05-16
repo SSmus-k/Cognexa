@@ -14,3 +14,20 @@ venv/
 
 # VS Code
 .vscode/
+
+
+# .env
+.env
+*.env
+.env.*
+
+# in your root .gitignore
+.env
+.env.*
+*.env
+__pycache__/
+*.pyc
+media/
+db.sqlite3
+node_modules/
+dist/

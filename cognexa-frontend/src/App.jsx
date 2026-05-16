@@ -151,12 +151,14 @@ function Navigation({ isDark, setIsDark }) {
 }
 
 function App() {
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(() => {
+  return localStorage.getItem('theme') === 'dark'
+  })
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }, [isDark])
-
   return (
     <Router>
       <div className={`min-h-screen ${isDark ? 'dark bg-slate-900' : 'bg-amber-50'}`}>

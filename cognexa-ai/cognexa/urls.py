@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from courses.views import CourseViewSet, VideoViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet
+from courses.views import CourseViewSet, VideoViewSet, EnrollmentViewSet, UserProgressViewSet
 from users.views import UserViewSet
 from django.conf.urls.static import static
 from django.conf import settings
@@ -25,7 +25,7 @@ router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'videos', VideoViewSet, basename='video')
-router.register(r'lessons', LessonViewSet, basename='lesson')
+
 router.register(r'enrollments', EnrollmentViewSet, basename='enrollment')
 router.register(r'progress', UserProgressViewSet, basename='progress')
 

@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, Lock, AlertCircle } from 'lucide-react'
-import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:8000/api'
+import { authAPI } from '../services/api'
 
 export default function Login() {
   const [username, setUsername] = useState('')
@@ -19,25 +17,20 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/users/login/`, {
-        username,
-        password,
-      })
-
+      const response = await authAPI.login({ username, password })
       // Save token to localStorage
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-
+      localStorage.setItem('token', response.token)
+localStorage.setItem('user', JSON.stringify(response.user))
       // Redirect based on role
-      if (response.data.user.role === 'teacher') {
+      if (response.user.role === 'teacher') {
         navigate('/teacher-dashboard')
-      } else if (response.data.user.role === 'admin') {
+      } else if (response.user.role === 'admin') {
         navigate('/admin-panel')
       } else {
         navigate('/dashboard')
       }
     } catch (err) {
-      setError(err.response?.data?.non_field_errors?.[0] || 'Login failed. Please check your credentials.')
+      setError(err.message || 'Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
     }

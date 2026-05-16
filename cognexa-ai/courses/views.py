@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
-from .models import Course, Video, Lesson, Enrollment, UserProgress
-from .serializers import CourseSerializer, VideoSerializer, LessonSerializer, EnrollmentSerializer, UserProgressSerializer
+from .models import Course, Video, Enrollment, UserProgress
+from .serializers import CourseSerializer, VideoSerializer, EnrollmentSerializer, UserProgressSerializer
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -67,16 +67,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         return Response({'views': video.views})
 
 
-class LessonViewSet(viewsets.ModelViewSet):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
-    def get_queryset(self):
-        course_id = self.request.query_params.get('course_id', None)
-        if course_id:
-            return Lesson.objects.filter(course_id=course_id)
-        return Lesson.objects.all()
 
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
@@ -99,26 +89,22 @@ class UserProgressViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def update_progress(self, request):
         video_id = request.data.get('video_id')
-        lesson_id = request.data.get('lesson_id')
         progress_percentage = request.data.get('progress_percentage', 0)
         watch_time = request.data.get('watch_time', 0)
-        
-        if video_id:
-            progress, created = UserProgress.objects.get_or_create(
-                user=request.user,
-                video_id=video_id
-            )
-        else:
-            progress, created = UserProgress.objects.get_or_create(
-                user=request.user,
-                lesson_id=lesson_id
-            )
-        
+
+        if not video_id:
+            return Response({'error': 'video_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        progress, created = UserProgress.objects.get_or_create(
+            user=request.user,
+            video_id=video_id
+        )
+
         progress.progress_percentage = progress_percentage
         progress.watch_time = watch_time
         if progress_percentage >= 100:
             progress.completed = True
         progress.save()
-        
+
         serializer = UserProgressSerializer(progress)
         return Response(serializer.data)

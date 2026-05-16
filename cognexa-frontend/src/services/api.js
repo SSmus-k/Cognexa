@@ -1,7 +1,8 @@
-const API_BASE_URL = 'http://localhost:8000/api'
-
+const API_BASE_URL = import.meta.env.VITE_API_URL
 // Get token from localStorage
 const getToken = () => localStorage.getItem('token')
+
+
 
 // API helper function
 const apiCall = async (endpoint, options = {}) => {
@@ -98,7 +99,7 @@ export const videoAPI = {
       method: 'POST',
       body: formData,
     }),
-
+    
   incrementViews: (id) =>
     apiCall(`/videos/${id}/increment_views/`, {
       method: 'POST',

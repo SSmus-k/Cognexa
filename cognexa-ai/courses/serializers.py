@@ -1,11 +1,8 @@
 from rest_framework import serializers
-from .models import Course, Video, Lesson, Enrollment, UserProgress
+from .models import Course, Video,  Enrollment, UserProgress
 from users.serializers import UserSerializer
 
-class LessonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Lesson
-        fields = ['id', 'title', 'description', 'video_url', 'duration', 'order', 'created_at']
+
 
 class VideoSerializer(serializers.ModelSerializer):
     uploaded_by = UserSerializer(read_only=True)
@@ -17,7 +14,7 @@ class VideoSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     videos = VideoSerializer(many=True, read_only=True)
-    lessons = LessonSerializer(many=True, read_only=True)
+   
     instructor_name = serializers.CharField(source='instructor.username', read_only=True)
     instructor = UserSerializer(read_only=True)
     enrollment_count = serializers.SerializerMethodField()
@@ -41,7 +38,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
 class UserProgressSerializer(serializers.ModelSerializer):
     video = VideoSerializer(read_only=True)
-    lesson = LessonSerializer(read_only=True)
+    
     lesson_title = serializers.CharField(source='lesson.title', read_only=True)
     
     class Meta:
