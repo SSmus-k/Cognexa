@@ -9,6 +9,7 @@ const API_BASE_URL = 'http://localhost:8000/api'
 export default function TeacherDashboard() {
   const [user, setUser] = useState(null)
   const [videos, setVideos] = useState([])
+  const [courses, setCourses] = useState([])
   const [showUploadForm, setShowUploadForm] = useState(false)
   const [uploadData, setUploadData] = useState({
     title: '',
@@ -31,7 +32,20 @@ export default function TeacherDashboard() {
     
     setUser(JSON.parse(userData))
     fetchVideos()
+    fetchCourses()
   }, [navigate])
+
+  const fetchCourses = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await axios.get(`${API_BASE_URL}/courses/my_teaching_courses/`, {
+      headers: { 'Authorization': `Token ${token}` },
+    })
+    setCourses(response.data.results || response.data)  // ← handle pagination
+  } catch (error) {
+    console.error('Error fetching courses:', error)
+  }
+}
 
   const handleUploadChange = (e) => {
     const { name, value, files } = e.target
@@ -82,7 +96,7 @@ export default function TeacherDashboard() {
       const response = await axios.get(`${API_BASE_URL}/videos/`, {
         headers: { 'Authorization': `Token ${token}` },
       })
-      setVideos(response.data)
+      setVideos(response.data.results || response.data)  // ← handle pagination
     } catch (error) {
       console.error('Error fetching videos:', error)
     }
@@ -299,6 +313,15 @@ export default function TeacherDashboard() {
                   animate={{ opacity: 1 }}
                   className="border-l-4 border-amber-600 pl-4 py-4 bg-slate-50 dark:bg-slate-700 rounded-r-lg"
                 >
+                {video.video_file && (
+                  <video
+                    controls
+                    className="w-full h-auto rounded-lg mb-4"
+                    src={video.video_file}
+                  >
+                    your browser doesnot support video files.
+                    </video>
+                )}
                   <h3 className="font-semibold text-slate-900 dark:text-white">{video.title}</h3>
                   <p className="text-sm text-slate-600 dark:text-gray-400">{video.description}</p>
                   <div className="flex gap-4 mt-2 text-xs text-slate-500 dark:text-gray-400">

@@ -19,7 +19,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from courses.views import CourseViewSet, VideoViewSet, LessonViewSet, EnrollmentViewSet, UserProgressViewSet
 from users.views import UserViewSet
-
+from django.conf.urls.static import static
+from django.conf import settings
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'courses', CourseViewSet, basename='course')
@@ -32,4 +33,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
