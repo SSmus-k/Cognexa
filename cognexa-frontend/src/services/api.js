@@ -22,13 +22,17 @@ const apiCall = async (endpoint, options = {}) => {
   })
 
   if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
-    }
-    throw new Error(`API Error: ${response.status}`)
+  if (response.status === 401) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    window.location.href = '/login'
   }
+  const errorData = await response.json().catch(() => null)
+  const message = errorData
+    ? Object.values(errorData).flat().join(' ')
+    : `API Error: ${response.status}`
+  throw new Error(message)
+}
 
   return response.json()
 }
@@ -123,4 +127,7 @@ export const enrollmentAPI = {
   getEnrollments: () => apiCall('/enrollments/'),
 
   getEnrollment: (id) => apiCall(`/enrollments/${id}/`),
+}
+export const gradeAPI = {
+  listGrades: () => apiCall('/grades/'),
 }
